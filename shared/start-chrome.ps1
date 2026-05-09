@@ -1,41 +1,57 @@
-# Chrome をデバッグモード(CDP)で起動するスクリプト
+# Chrome を CDP モードで起動するスクリプト
 # 使い方: PowerShellで .\start-chrome.ps1
+#
+# 注: Chrome 136+ ではセキュリティ上の理由でメインプロファイル(User Data)では
+# --remote-debugging-port がサイレント無効化されるため、専用プロファイルを使う。
+# 専用プロファイルへのGoogle等ログインは初回手動で（その後永続）。
 
-# === 既存Chrome終了 ===
-Write-Host "Chrome を全て閉じています..."
-Stop-Process -Name chrome -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 2
+# === 設定 ===
+$ChromeExe = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+$DataDir = Join-Path $env:LOCALAPPDATA "Google\Chrome\RpaProfile"  # ← 専用プロファイル
+$Port = 9222
 
 # === 既に CDP モードで動いてるなら何もしない（idempotent） ===
 try {
-    $existing = Invoke-WebRequest -Uri "http://localhost:9222/json/version" -UseBasicParsing -TimeoutSec 1
+    $existing = Invoke-WebRequest -Uri "http://localhost:$Port/json/version" -UseBasicParsing -TimeoutSec 1
     Write-Host "既にCDPモードで起動中、スキップ" -ForegroundColor Green
     Write-Host $existing.Content
     exit 0
 } catch {}
 
-# === Chrome 起動 ===
-Write-Host "Chrome をデバッグモードで起動中..."
-$chromeExe = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$dataDir = Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data"
+# === 既存の RPA Chrome のみ終了 (メインChromeには触らない) ===
+$rpaProcs = Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like "*$DataDir*" }
+if ($rpaProcs) {
+    Write-Host "既存RPA Chromeを終了..."
+    $rpaProcs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Seconds 2
+}
 
-# パスにスペースが含まれるので & 演算子で個別引数として渡す
-# (Start-Process -ArgumentList @ だとスペース分割される問題回避)
-Start-Process -FilePath $chromeExe -ArgumentList @(
-    "--remote-debugging-port=9222",
-    "`"--user-data-dir=$dataDir`""
+# === 専用プロファイルディレクトリ確保 ===
+if (-not (Test-Path $DataDir)) {
+    New-Item -ItemType Directory -Path $DataDir -Force | Out-Null
+    Write-Host "専用プロファイル作成: $DataDir"
+}
+
+# === 起動 ===
+Write-Host "Chrome (RPA専用プロファイル) を CDP モードで起動..."
+Start-Process -FilePath $ChromeExe -ArgumentList @(
+    "--remote-debugging-port=$Port",
+    "`"--user-data-dir=$DataDir`"",
+    "--no-first-run",
+    "--no-default-browser-check"
 )
 
 Start-Sleep -Seconds 3
 
-# === 起動確認 ===
+# === 起動確認 (リトライ) ===
 Write-Host "CDPポート確認中..."
 $retries = 5
 $ok = $false
 for ($i = 0; $i -lt $retries; $i++) {
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:9222/json/version" -UseBasicParsing -TimeoutSec 3
-        Write-Host "OK! Chrome CDP 起動済み" -ForegroundColor Green
+        $response = Invoke-WebRequest -Uri "http://localhost:$Port/json/version" -UseBasicParsing -TimeoutSec 3
+        Write-Host "OK! Chrome CDP 起動済み (port $Port)" -ForegroundColor Green
         Write-Host $response.Content
         $ok = $true
         break
@@ -45,7 +61,10 @@ for ($i = 0; $i -lt $retries; $i++) {
 }
 
 if (-not $ok) {
-    Write-Host "起動失敗：CDPポート9222が応答しない" -ForegroundColor Red
-    Write-Host "  Chromeの拡張やセキュリティソフトがブロックしてる可能性" -ForegroundColor Yellow
+    Write-Host "起動失敗：CDPポート$Portが応答しない" -ForegroundColor Red
     exit 1
 }
+
+Write-Host ""
+Write-Host "メモ: このChromeはRPA専用。Google等のログインは初回手動で。" -ForegroundColor Cyan
+Write-Host "プロファイル: $DataDir" -ForegroundColor Cyan
