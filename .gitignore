@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+dist/
+
+# build output
+*.tsbuildinfo
+
+# secrets / local config
+.env
+.env.local
+
+# runtime artifacts
+output/
+screenshots/
+input/
+*.log
+
+# 個人プロジェクト固有のサブリポジトリ（別管理）
+wordpress-rpa-custom/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

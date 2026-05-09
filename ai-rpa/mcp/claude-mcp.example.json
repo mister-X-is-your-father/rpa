@@ -1,0 +1,10 @@
+{
+  "_comment": "Claude Code の MCP server 設定スニペット。~/.claude.json または .mcp.json に追加。",
+  "_replace": "asus-1.tail<XXXXX>.ts.net をあなたのTailnet名に置換すること。",
+  "mcpServers": {
+    "playwright-remote": {
+      "type": "sse",
+      "url": "http://asus-1.tail<XXXXX>.ts.net:8931/sse"
+    }
+  }
+}
