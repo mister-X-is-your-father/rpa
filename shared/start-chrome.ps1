@@ -1,4 +1,4 @@
-# Chrome を CDP モードで起動するスクリプト
+﻿# Chrome を CDP モードで起動するスクリプト
 # 使い方: PowerShellで .\start-chrome.ps1
 #
 # 注: Chrome 136+ ではセキュリティ上の理由でメインプロファイル(User Data)では

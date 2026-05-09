@@ -1,4 +1,4 @@
-# Playwright MCP サーバーを Tailscale 越しに公開して起動するスクリプト
+﻿# Playwright MCP サーバーを Tailscale 越しに公開して起動するスクリプト
 # 前提: ../start-chrome.ps1 で Chrome が --remote-debugging-port=9222 で起動済み
 
 # === 設定 ===

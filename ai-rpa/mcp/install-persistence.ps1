@@ -1,4 +1,4 @@
-# asus-1 永続化インストーラー
+﻿# asus-1 永続化インストーラー
 # Task Schedulerに「ログオン時にChrome+MCPサーバー自動起動」を登録
 # 使い方: 管理者PowerShellで .\install-persistence.ps1
 # アンインストール: .\install-persistence.ps1 -Uninstall

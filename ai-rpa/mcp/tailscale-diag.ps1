@@ -1,4 +1,4 @@
-# Tailscale疑惑切り分け診断スクリプト (asus-1で実行)
+﻿# Tailscale疑惑切り分け診断スクリプト (asus-1で実行)
 # PowerShellを管理者で開いて: .\tailscale-diag.ps1
 
 Write-Host "=== Tailscale バージョン ===" -ForegroundColor Cyan

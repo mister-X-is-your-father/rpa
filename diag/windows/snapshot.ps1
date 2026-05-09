@@ -1,4 +1,4 @@
-# 診断スナップショット (定期 + イベント発火 両用)
+﻿# 診断スナップショット (定期 + イベント発火 両用)
 # 出力: C:\Logs\diag\YYYY-MM-DD\HHMMSS_<reason>.txt
 
 param(

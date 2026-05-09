@@ -1,0 +1,6 @@
+# PowerShell files: preserve BOM and use CRLF for Windows compatibility
+*.ps1 text eol=crlf working-tree-encoding=UTF-8
+
+# Keep batch files as CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
