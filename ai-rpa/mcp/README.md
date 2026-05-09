@@ -70,7 +70,31 @@ Claude Code を再起動すると `mcp__playwright-remote__*` ツール群が利
 
 ## 永続化（auto-start）
 
-Phase 3で対応予定。タスクスケジューラ or NSSM経由でWindows起動時に自動立ち上げ。
+`install-persistence.ps1` を**管理者PowerShellで1回実行**するだけ：
+
+```powershell
+cd ~\rpa\ai-rpa\mcp
+.\install-persistence.ps1
+```
+
+これで以下がTask Schedulerに登録される：
+
+| タスク名 | トリガー | アクション |
+|---|---|---|
+| `RPA-Chrome-CDP` | ログオン時 | `start-chrome.ps1` 実行 → Chrome (CDP) 起動 |
+| `RPA-MCP-Server` | ログオン+30秒 | `start-mcp.ps1` 実行 → MCPサーバー起動。失敗時は1分間隔で自動再起動（999回まで） |
+
+`tailscale serve --bg` も Tailscale state に永続保存されるので、**全レイヤー再起動耐性**が成立。
+
+確認:
+```powershell
+Get-ScheduledTask -TaskName 'RPA-*' | Format-Table TaskName,State,LastRunTime,LastTaskResult
+```
+
+アンインストール:
+```powershell
+.\install-persistence.ps1 -Uninstall
+```
 
 ## 既存rpa/との関係
 
