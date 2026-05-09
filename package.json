@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/node": "^25.5.1",
     "dotenv": "^17.4.0",
     "playwright": "^1.59.1",
